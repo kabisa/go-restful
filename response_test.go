@@ -8,7 +8,7 @@ import (
 
 func TestWriteHeader(t *testing.T) {
 	httpWriter := httptest.NewRecorder()
-	resp := Response{httpWriter, "*/*", []string{"*/*"}, 0, 0}
+	resp := Response{httpWriter, acceptHeader{"*/*"}, []string{"*/*"}, 0, 0}
 	resp.WriteHeader(123)
 	if resp.StatusCode() != 123 {
 		t.Errorf("Unexpected status code:%d", resp.StatusCode())
@@ -17,7 +17,7 @@ func TestWriteHeader(t *testing.T) {
 
 func TestNoWriteHeader(t *testing.T) {
 	httpWriter := httptest.NewRecorder()
-	resp := Response{httpWriter, "*/*", []string{"*/*"}, 0, 0}
+	resp := Response{httpWriter, acceptHeader{"*/*"}, []string{"*/*"}, 0, 0}
 	if resp.StatusCode() != http.StatusOK {
 		t.Errorf("Unexpected status code:%d", resp.StatusCode())
 	}
@@ -30,7 +30,7 @@ type food struct {
 // go test -v -test.run TestMeasureContentLengthXml ...restful
 func TestMeasureContentLengthXml(t *testing.T) {
 	httpWriter := httptest.NewRecorder()
-	resp := Response{httpWriter, "*/*", []string{"*/*"}, 0, 0}
+	resp := Response{httpWriter, acceptHeader{"*/*"}, []string{"*/*"}, 0, 0}
 	resp.WriteAsXml(food{"apple"})
 	if resp.ContentLength() != 76 {
 		t.Errorf("Incorrect measured length:%d", resp.ContentLength())
@@ -40,7 +40,7 @@ func TestMeasureContentLengthXml(t *testing.T) {
 // go test -v -test.run TestMeasureContentLengthJson ...restful
 func TestMeasureContentLengthJson(t *testing.T) {
 	httpWriter := httptest.NewRecorder()
-	resp := Response{httpWriter, "*/*", []string{"*/*"}, 0, 0}
+	resp := Response{httpWriter, acceptHeader{"*/*"}, []string{"*/*"}, 0, 0}
 	resp.WriteAsJson(food{"apple"})
 	if resp.ContentLength() != 22 {
 		t.Errorf("Incorrect measured length:%d", resp.ContentLength())
@@ -50,7 +50,7 @@ func TestMeasureContentLengthJson(t *testing.T) {
 // go test -v -test.run TestMeasureContentLengthWriteErrorString ...restful
 func TestMeasureContentLengthWriteErrorString(t *testing.T) {
 	httpWriter := httptest.NewRecorder()
-	resp := Response{httpWriter, "*/*", []string{"*/*"}, 0, 0}
+	resp := Response{httpWriter, acceptHeader{"*/*"}, []string{"*/*"}, 0, 0}
 	resp.WriteErrorString(404, "Invalid")
 	if resp.ContentLength() != len("Invalid") {
 		t.Errorf("Incorrect measured length:%d", resp.ContentLength())
@@ -60,7 +60,7 @@ func TestMeasureContentLengthWriteErrorString(t *testing.T) {
 // go test -v -test.run TestStatusCreatedAndContentTypeJson_Issue54 ...restful
 func TestStatusCreatedAndContentTypeJson_Issue54(t *testing.T) {
 	httpWriter := httptest.NewRecorder()
-	resp := Response{httpWriter, "application/json", []string{"application/json"}, 0, 0}
+	resp := Response{httpWriter, acceptHeader{"application/json"}, []string{"application/json"}, 0, 0}
 	resp.WriteHeader(201)
 	resp.WriteAsJson(food{"Juicy"})
 	if httpWriter.HeaderMap.Get("Content-Type") != "application/json" {
