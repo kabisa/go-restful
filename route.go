@@ -44,7 +44,7 @@ func (r *Route) wrapRequestResponse(httpWriter http.ResponseWriter, httpRequest 
 	wrappedRequest := newRequest(httpRequest)
 	wrappedRequest.pathParameters = params
 	wrappedResponse := newResponse(httpWriter)
-	wrappedResponse.requestAccept = httpRequest.Header.Get(HEADER_Accept)
+	wrappedResponse.requestAccept = acceptHeader{httpRequest.Header.Get(HEADER_Accept)}
 	wrappedResponse.routeProduces = r.Produces
 	return wrappedRequest, wrappedResponse
 }

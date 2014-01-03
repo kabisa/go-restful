@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"net/http"
-	"strings"
 )
 
 // If Accept header matching fails, fall back to this type, otherwise
@@ -22,14 +21,14 @@ var DefaultResponseMimeType string
 // It provides several convenience methods to prepare and write response content.
 type Response struct {
 	http.ResponseWriter
-	requestAccept string   // mime-type what the Http Request says it wants to receive
-	routeProduces []string // mime-types what the Route says it can produce
-	statusCode    int      // HTTP status code that has been written explicity (if zero then net/http has written 200)
-	contentLength int      // number of bytes written for the response body
+	requestAccept acceptHeader // holds mime-types what the Http Request says it wants to receive
+	routeProduces []string     // mime-types what the Route says it can produce
+	statusCode    int          // HTTP status code that has been written explicity (if zero then net/http has written 200)
+	contentLength int          // number of bytes written for the response body
 }
 
 func newResponse(httpWriter http.ResponseWriter) *Response {
-	return &Response{httpWriter, "", []string{}, http.StatusOK, 0} // empty content-types
+	return &Response{httpWriter, acceptHeader{}, []string{}, http.StatusOK, 0} // empty content-types
 }
 
 // InternalServerError writes the StatusInternalServerError header.
@@ -50,7 +49,7 @@ func (r Response) AddHeader(header string, value string) Response {
 // If an Accept header is specified then return the Content-Type as specified by the first in the Route.Produces that is matched with the Accept header.
 // Current implementation ignores any q-parameters in the Accept Header.
 func (r *Response) WriteEntity(value interface{}) *Response {
-	if "" == r.requestAccept || "*/*" == r.requestAccept {
+	if r.requestAccept.acceptsAny() {
 		for _, each := range r.routeProduces {
 			if MIME_JSON == each {
 				r.WriteAsJson(value)
@@ -63,7 +62,7 @@ func (r *Response) WriteEntity(value interface{}) *Response {
 		}
 	} else { // Accept header specified ; scan for each element in Route.Produces
 		for _, each := range r.routeProduces {
-			if strings.Index(r.requestAccept, each) != -1 {
+			if r.requestAccept.acceptsMIME(each) {
 				if MIME_JSON == each {
 					r.WriteAsJson(value)
 					return r
