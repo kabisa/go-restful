@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/emicklei/go-restful"
+	"github.com/kabisaict/go-restful"
 )
 
 // go test -v -test.run TestApi ...swagger
